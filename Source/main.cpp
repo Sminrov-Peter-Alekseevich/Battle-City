@@ -4,46 +4,57 @@
 
 using namespace std;
 
-int main(void)
-{
+int windowSizeWidth = 640;
+int windowSizeHeight = 480;
+
+void glWindowResizeCallback(GLFWwindow *window,int width,int height){
+    windowSizeWidth = width;
+    windowSizeHeight = height;
+    glViewport(0,0,width,height);
+}
+void glKeyPressCallback(GLFWwindow *window,int key,int scanMode,int action,int mode){
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+        glfwSetWindowShouldClose(window,GL_TRUE);
+    }
+}
+
+int main(void){
     setlocale(LC_ALL,"ru");
 
-    GLFWwindow* window;
-
-    /* Initialize the library */
-    if (!glfwInit())
+    if (!glfwInit()) {
+        cout << "ошибка: glfw не инициализировался" << endl;
         return -1;
+    }
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-    {
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,0);
+    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(windowSizeWidth, windowSizeHeight, "Battle City", nullptr, nullptr);
+    if (!window){
+        cout << "ошибка: не удалось создать окно" << endl;
         glfwTerminate();
         return -1;
     }
 
-    /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
     if(!gladLoadGL()){
-        cout << "Ошибка: GLAD не подключился." << endl;
+        cout << "Ошибка: GLAD не инициализировался." << endl;
         return -1;
     }
 
-    cout << "OpenGL " << GLVersion.major << " " << GLVersion.minor << endl;
+    cout << "видеокарта " << glGetString(GL_RENDERER) << endl;
+    cout << "OpenGL версия " << glGetString(GL_VERSION) << endl;
 
-    glClearColor(0,0,1,1);
+    glClearColor(0,0,0,1);
 
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
+    glfwSetWindowSizeCallback(window,&glWindowResizeCallback);
+    glfwSetKeyCallback(window,glKeyPressCallback);
+
+    while (!glfwWindowShouldClose(window)){
         glClear(GL_COLOR_BUFFER_BIT);
-
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
     }
 
